@@ -137,7 +137,6 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def teleopPeriodic(self) -> None:
         # Teleop periodic logic
-        #turn_to_object(self)
         self.turn_to_object()
         x = self.camera.getX()
         print(f"x={x}")
@@ -182,13 +181,11 @@ class MyRobot(commands2.TimedCommandRobot):
         self.swerve.drive(x_speed, y_speed, rot, field_relative, rate_limit=True)
 
     def turn_to_object(self) -> None:
-     #   self.swerve.drive(0,0,self.camera.getX() * 0.05, False,rate_limit=True)
-      #  self.swerve.drive(.1,0,0, True,rate_limit=True)
-        if(self.oldX-self.camera.getX()>5):
+
+        if(self.oldX-self.camera.getX()>10 or self.oldX-self.camera.getX()<-10):
             self.swerve.drive(0,0,self.camera.getX() * 0.05, False, True)
-        #elif(self.timer.get()%3==0):
         else:
-            self.swerve.drive(.1,0,0, False ,True)
+            self.swerve.drive(.25,0,0, False ,True)
 
 
 
