@@ -18,6 +18,13 @@ import logging
 
 logging.basicConfig(level=logging.DEBUG)
 
+
+
+
+from subsystems.vision import VisionSubsystem 
+
+
+
 class MyRobot(commands2.TimedCommandRobot):
     def robotInit(self) -> None:
         self.driver_controller = commands2.button.CommandXboxController(0)
@@ -25,6 +32,17 @@ class MyRobot(commands2.TimedCommandRobot):
         self.swerve = drivesubsystem.DriveSubsystem()
         self.climb_subsystem = climb.ClimbSubsystem()
         self.intake_subsystem = intake.IntakeSubsystem()
+        """Initialize the robot and subsystems."""
+        # 1. Instantiate the vision subsystem
+        # This starts the Limelight NetworkTables and DataLogManager
+        self.vision = VisionSubsystem()
+        
+        # 2. Setup a timer to throttle terminal logs (so it doesn't spam)
+        self.log_timer = wpilib.Timer()
+        self.log_timer.start()
+
+        print("--- 2026 REBUILT: Vision System Linked ---")
+
 
 
         
@@ -120,6 +138,21 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()
+        def robotPeriodic(self):
+        """Runs every 20ms. Required for VisionSubsystem.periodic() to run."""
+        commands2.CommandScheduler.getInstance().run()
+
+        # --- THE CALLBACK ---
+        # We call the method we wrote in vision.py to get the live distance
+        if self.log_timer.hasElapsed(0.5): # Log to terminal every 0.5 seconds
+            distance = self.vision.get_distance_to_tag()
+            
+            if distance > 0:
+                print(f"[RIO Log] Target Distance: {distance:.2f} inches")
+            else:
+                print("[RIO Log] No AprilTag detected.")
+                
+            self.log_timer.reset()
 
     
     def autonomousInit(self) -> None:
@@ -142,6 +175,14 @@ class MyRobot(commands2.TimedCommandRobot):
         print(f"x={x}")
         if(self.timer.get() % 2 == 0):
             self.oldX=self.camera.getX()
+            
+    def teleopPeriodic(self):
+        """Example of using the distance for robot logic during the match."""
+        dist = self.vision.get_distance_to_tag()
+        
+        # If we are closer than 20 inches, maybe light up an LED or rumble
+        if 0 < dist < 20.0:
+            wpilib.SmartDashboard.putBoolean("Ready to Score", True)
     
     def testPeriodic(self) -> None:
         pass
