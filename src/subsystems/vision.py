@@ -56,10 +56,7 @@ class VisionSubsystem(commands2.Subsystem):
         # --- TERMINAL LOGGING ---
         self.log_counter += 1
         if self.log_counter >= 25: # Only print every ~0.5 seconds
-            if dist > 0:
-                print(f"[Vision] Tag {tag_id} detected! Distance: {dist:.2f} inches")
-            else:
-                print("[Vision] No valid target in view.")
+            print(f"[Vision] Tag {tag_id} detected! Distance: {dist:.2f} inches")
             self.log_counter = 0
 
 class MyRobot(commands2.TimedCommandRobot):
